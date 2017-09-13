@@ -10,32 +10,23 @@
 #*****************************************************************************
 
 #------------------------------------------------------------------------------
-# <Put a Description Here>
+# <MAKE File FOR HOST and MSP432>
 #
 # Use: make [TARGET] [PLATFORM-OVERRIDES]
 #
 # Build Targets:
-#      <Put a description of the supported targets here>
+#      <FILE>.i Build preprocessed file
+#      <FILE>.asm Build assembly file
+#      <FILE>.o Build object file 
+#      compile-all Compile all object files
+#      build Compile and link project.out
+#      clean Remove all generated files
 #
-# Platform Overrides:
-#      <Put a description of the supported Overrides here
-#
+# 
 #------------------------------------------------------------------------------
 include sources.mk
 
-# Platform Overrides
-PLATFORM = HOST
-
-
 OBJS := $(SOURCES:.c=.o)
-
-
-# LD = 
-# LDFLAGS = 
-# CFLAGS = 
-# CPPFLAGs = 
-
-
 
 
 	ifeq ($(PLATFORM),HOST)
@@ -66,7 +57,7 @@ OBJS := $(SOURCES:.c=.o)
 	$(CC) -S $(SOURCES) $(CFLAGS) $(INCLUDES) -C 
 
 %.o: %.c
-	$(CC) -c $< $(CFLAGS) -o $@ $(LDFLAGS) $(INCLUDES) -MD
+	$(CC) $(CFLAGS) $(ARCH) $(INCLUDES) -MD -c $< -o $@
 
 .PHONY:compile-all 
 compile-all: $(OBJS)
@@ -79,4 +70,4 @@ build: $(OBJS)
 
 .PHONY:clean
 clean:
-	rm -f *.map *.out *.o *.asm *.i *.s	*.d
+	rm -f *.d *.map *.out *.o *.asm *.i *.s	
