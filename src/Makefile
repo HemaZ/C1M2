@@ -44,12 +44,18 @@ OBJS := $(SOURCES:.c=.o)
 
 	else
 		CC = arm-none-eabi-gcc
-		LINKER_FILE = msp432p401r.lds
+		CFLAGS = -DMSP432 $(COMMON_CFLAGS)
+        LINKER_FILE = ../msp432p401r.lds
+		LDFLAGS = -T $(LINKER_FILE)
 		CPU = cortex-m4
-		ARCH = thumb
-		SPECS = nosys.specs
-		LDFLAGS = -Wl,-Map=c1m2.map -T $(LINKER_FILE)
-		CFLAGS = -mcpu=$(CPU) -m$(ARCH) --specs=$(SPECS) -Wall -g -O0 -std=c99 -DMSP432
+		SPECS=nosys.specs
+		ARCH = \
+	     -mcpu=$(CPU) \
+	     -mthumb \
+	     -march=armv7e-m \
+	     -mfloat-abi=hard \
+	     -mfpu=fpv4-sp-d16 \
+	     --specs=$(SPECS)
 
 	endif
 
@@ -57,10 +63,10 @@ OBJS := $(SOURCES:.c=.o)
 	$(CC) -E $(SOURCES) $(CFLAGS) $(INCLUDES) -C
 	
 %.asm: %.c
-	$(CC) -S $(SOURCES) $(CFLAGS) $(INCLUDES) -C
+	$(CC) -S $(SOURCES) $(CFLAGS) $(INCLUDES) -C 
 
 %.o: %.c
-	$(CC) -c $< $(CFLAGS) -o $@ $(LDFLAGS) $(INCLUDES)
+	$(CC) -c $< $(CFLAGS) -o $@ $(LDFLAGS) $(INCLUDES) -MD
 
 .PHONY:compile-all 
 compile-all: $(OBJS)
@@ -68,8 +74,9 @@ compile-all: $(OBJS)
 
 .PHONY:build
 build: $(OBJS)
-	$(CC) –O c1m2.out $(SOURCES) $(LDFLAGS) $(INCLUDES) $(CFLAGS)
+	$(CC) $(CFLAGS) $(ARCH) $(INCLUDES) $(LDFLAGS) -Xlinker -Map=c1m2.map -o c1m2.out $(OBJS)
+	size c1m2.out
 
 .PHONY:clean
 clean:
-	rm -f *.map *.out *.o *.asm *.i *.s	
+	rm -f *.map *.out *.o *.asm *.i *.s	*.d
